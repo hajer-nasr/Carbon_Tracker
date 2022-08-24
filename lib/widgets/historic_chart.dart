@@ -1,11 +1,15 @@
 import 'dart:core';
+import 'dart:async';
+import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:carbon_tracker/models/activity.dart' as ActivityModel;
 import 'dart:developer' as dev;
 
 import '../db/activities_db.dart';
+import '../providers/activities_provider.dart';
 
 class HistoricChart extends StatefulWidget with ChangeNotifier {
   HistoricChart({Key? key}) : super(key: key);
@@ -22,6 +26,25 @@ class ChartData {
 }
 
 class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
+  void _handleError(dynamic error) {
+    dev.log('Catch Error >> $error');
+  }
+
+  @override
+  void dispose() {
+    _activityStreamController.close();
+
+    _activityStreamSubscription?.cancel();
+    super.dispose();
+  }
+
+  final _activityStreamController = StreamController<Activity>();
+  StreamSubscription<Activity>? _activityStreamSubscription;
+
+  void _onActivityReceive(Activity activity) async {
+    refreshPage();
+  }
+
   List<ActivityModel.Activity>? activities;
   List<Map<String, Object?>>? list;
 
@@ -40,7 +63,7 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
   var _totalNov = 0.0;
 
   var _totalDec = 0.0;
-  double? totalYear;
+  var totalYear = 0.0;
 
   double total_last_month = 0.0;
   double total_this_month = 0.0;
@@ -51,8 +74,25 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
 
   Future refreshPage() async {
     setState(() => isLoading = false);
+    _totalJan = 0.0;
+    _totalFev = 0.0;
+    _totalMars = 0.0;
+    _totalAvr = 0.0;
+    _totalMay = 0.0;
+    _totalJun = 0.0;
+    _totalJul = 0.0;
+    _totalAout = 0.0;
+    _totalSep = 0.0;
+    _totalOct = 0.0;
+    _totalNov = 0.0;
+    _totalDec = 0.0;
+    totalYear = 0.0;
+
     list = await ActivitiesDb.instance.getTotal();
-    totalYear = (list![0].values.first as double);
+    if (list![0].values.first != null) {
+      totalYear = (list![0].values.first as double);
+    }
+    // dev.log('$totalYear');
     this.activities = await ActivitiesDb.instance.readAll();
     setState(() {
       for (int i = 0; i < activities!.length; i++) {
@@ -80,7 +120,7 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
         var value = taux.toStringAsFixed(2);
         string_taux = sign! + value;
       } else if (taux == 0) {
-        string_taux = taux.toStringAsFixed(1);
+        string_taux = null;
       }
       isLoading = false;
 
@@ -151,17 +191,35 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
     });
   }
 
-  TooltipBehavior? _tooltipBehavior;
-  TrackballBehavior? _trackballBehavior;
-
   @override
   void initState() {
     refreshPage();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        final activityRecognition = FlutterActivityRecognition.instance;
+        _activityStreamSubscription = activityRecognition.activityStream
+            .handleError(_handleError)
+            .listen(_onActivityReceive);
+      },
+    );
     _trackballBehavior = TrackballBehavior(
-        enable: true, activationMode: ActivationMode.singleTap);
-    _tooltipBehavior = TooltipBehavior(enable: true);
+      enable: true,
+      tooltipSettings: const InteractiveTooltip(
+          textStyle: TextStyle(color: Colors.transparent),
+          color: Colors.transparent),
+      activationMode: ActivationMode.singleTap,
+      lineColor: Colors.transparent,
+    );
+    tooltipBehavior = TooltipBehavior(
+        enable: true,
+        color: Colors.red,
+        shouldAlwaysShow: true,
+        borderColor: Colors.yellow);
     super.initState();
   }
+
+  TooltipBehavior? tooltipBehavior;
+  TrackballBehavior? _trackballBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -179,191 +237,189 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
       ChartData('Nov', _totalNov),
       ChartData('Dec', _totalDec)
     ];
-    return RefreshIndicator(
-      onRefresh: () => refreshPage(),
-      child: isLoading
-          ? Container(
-              padding: const EdgeInsets.all(70),
-              child: const Center(child: CircularProgressIndicator()),
-            )
-          : Column(
-              children: [
-                Container(
-                  alignment: AlignmentDirectional.topStart,
-                  padding: const EdgeInsets.fromLTRB(20, 20, 0, 10),
-                  child: const Text(
-                    "My  footprint ",
-                    style: TextStyle(color: Colors.white, fontSize: 17),
-                  ),
+    return isLoading
+        ? Container(
+            padding: const EdgeInsets.all(70),
+            child: const Center(child: CircularProgressIndicator()),
+          )
+        : Column(
+            children: [
+              Container(
+                alignment: AlignmentDirectional.topStart,
+                padding: const EdgeInsets.fromLTRB(20, 20, 0, 10),
+                child: const Text(
+                  "My  footprint ",
+                  style: TextStyle(color: Colors.white, fontSize: 17),
                 ),
-                Container(
-                  alignment: AlignmentDirectional.topStart,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 10),
-                  child: Row(
-                    children: [
-                      Text("${totalYear?.toStringAsFixed(3)} ",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 45,
-                              fontWeight: FontWeight.bold)),
-                      const Text('kg CO²/ year.',
-                          style: TextStyle(
+              ),
+              Container(
+                alignment: AlignmentDirectional.topStart,
+                padding: const EdgeInsets.fromLTRB(20, 0, 0, 10),
+                child: Row(
+                  children: [
+                    Text("${totalYear.toStringAsFixed(3)} ",
+                        style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 15,
-                          )),
-                    ],
-                  ),
+                            fontSize: 45,
+                            fontWeight: FontWeight.bold)),
+                    const Text('kg CO²/ year.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                        )),
+                  ],
                 ),
-                Container(
-                  alignment: Alignment.topLeft,
-                  padding: const EdgeInsets.fromLTRB(25, 0, 0, 10),
-                  child: Row(
-                    children: [
-                      sign == '+'
-                          ? const Icon(
-                              Icons.trending_up,
+              ),
+              Container(
+                alignment: Alignment.topLeft,
+                padding: const EdgeInsets.fromLTRB(25, 0, 0, 10),
+                child: Row(
+                  children: [
+                    string_taux != null
+                        ? sign == '+'
+                            ? const Icon(
+                                Icons.trending_up,
+                                color: Colors.white,
+                                size: 20,
+                              )
+                            : const Icon(
+                                Icons.trending_down,
+                                color: Colors.white,
+                                size: 20,
+                              )
+                        : Icon(Icons.trending_neutral_sharp,size:0),
+                    (string_taux != null
+                        ? Text("  $string_taux% per month",
+                            style: const TextStyle(
                               color: Colors.white,
-                              size: 20,
-                            )
-                          : const Icon(
-                              Icons.trending_down,
+                              fontSize: 20,
+                            ))
+                        : Text("No data found. ",
+                            style: const TextStyle(
                               color: Colors.white,
-                              size: 20,
-                            ),
-                      Text("  $string_taux% per month",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                          )),
-                    ],
-                  ),
+                              fontSize: 18,
+                            )))
+                  ],
                 ),
-                Container(
-                    height: 200,
-                    child: SfCartesianChart(
-                        trackballBehavior: _trackballBehavior,
-                        onTrackballPositionChanging: (TrackballArgs args) =>
-                            trackball(args).toString(),
-                        plotAreaBackgroundColor: Colors.transparent,
-                        plotAreaBorderColor: Colors.transparent,
-                        borderColor: Colors.transparent,
-                        primaryXAxis: CategoryAxis(
-                          labelPlacement: LabelPlacement.onTicks,
-                          isVisible: true,
-                          majorGridLines: const MajorGridLines(width: 0),
-                          //  axisLine: AxisLine(width: 5 ),
-                          interval: 1.2,
+              ),
+              Container(
+                  height: 200,
+                  child: SfCartesianChart(
+                      plotAreaBorderWidth: 0,
+                      trackballBehavior: _trackballBehavior,
+                      tooltipBehavior: TooltipBehavior(
+                        enable: true,
+                      ),
+                      onTrackballPositionChanging: (TrackballArgs args) =>
+                          trackball(args).toString(),
+                      plotAreaBackgroundColor: Colors.transparent,
+                      plotAreaBorderColor: Colors.transparent,
+                      borderColor: Colors.transparent,
+                      primaryXAxis: CategoryAxis(
+                        labelPlacement: LabelPlacement.onTicks,
+                        edgeLabelPlacement: EdgeLabelPlacement.shift,
+                        isVisible: true,
+                        majorGridLines: const MajorGridLines(width: 0),
+                        interval: 1.2,
+                        labelStyle:
+                            const TextStyle(color: Colors.white, fontSize: 15),
+                      ),
+                      primaryYAxis: NumericAxis(
+                          minimum: -2,
+                          labelFormat: '{value} Kg',
+                          majorTickLines: const MajorTickLines(size: 0),
                           labelStyle: const TextStyle(
-                              color: Colors.white, fontSize: 15),
-                        ),
-                        primaryYAxis: NumericAxis(
-                            minimum: -2,
-                            labelFormat: '{value} Kg',
-                            majorTickLines: const MajorTickLines(size: 10),
-                            labelStyle: const TextStyle(
-                                color: Colors.transparent, fontSize: 0),
-                            //  isVisible: false,
-                            majorGridLines: const MajorGridLines(
-                                width: 0.5, dashArray: [3, 10]),
-                            axisLine: const AxisLine(width: 0)),
-                        series: <ChartSeries>[
-                          SplineSeries<ChartData, String>(
-                              dataSource: chartData,
-                              xValueMapper: (ChartData data, _) => data.x,
-                              yValueMapper: (ChartData data, _) => data.y,
-                              color: Colors.white,
-                              name: "",
-                              markerSettings:
-                                  MarkerSettings(isVisible: true, width: 7),
-                              width: 3)
-                        ])),
-
-
-              ],
-            ),
-
-    );
+                              color: Colors.transparent, fontSize: 0),
+                          //  isVisible: false,
+                          majorGridLines: const MajorGridLines(
+                              width: 0.5, dashArray: [3, 10]),
+                          axisLine: const AxisLine(width: 0)),
+                      series: <ChartSeries>[
+                        SplineSeries<ChartData, String>(
+                            dataSource: chartData,
+                            xValueMapper: (ChartData data, _) => data.x,
+                            yValueMapper: (ChartData data, _) => data.y,
+                            color: Colors.white,
+                            name: "",
+                            enableTooltip: true,
+                            markerSettings: const MarkerSettings(
+                              isVisible: true,
+                              width: 6,
+                              color: Colors.tealAccent,
+                              borderColor: Colors.tealAccent,
+                            ),
+                            width: 3)
+                      ])),
+            ],
+          );
   }
 
   trackball(TrackballArgs args) {
-    //dev.log('trackball');
-    //dev.log('${args.chartPointInfo.header}');
     String? trackPosition = args.chartPointInfo.header;
     switch (trackPosition!) {
       case 'Jan':
         {
           monthNb = 1;
-          // notifyListeners();
         }
         break;
       case 'Feb':
         {
           monthNb = 2;
-          // notifyListeners();
         }
         break;
       case 'Mar':
         {
           monthNb = 3;
-          // notifyListeners();
         }
         break;
       case 'Apr':
         {
           monthNb = 4;
-          // notifyListeners();
         }
         break;
 
       case 'May':
         {
           monthNb = 5;
-          // notifyListeners();
         }
         break;
       case 'Jun':
         {
           monthNb = 6;
-          // notifyListeners();
         }
         break;
       case 'Jul':
         {
           monthNb = 7;
-          // notifyListeners();
         }
         break;
       case 'Aug':
         {
           monthNb = 8;
-          // notifyListeners();
         }
         break;
 
       case 'Sep':
         {
           monthNb = 9;
-          // notifyListeners();
         }
         break;
       case 'Oct':
         {
           monthNb = 10;
-          // notifyListeners();
         }
         break;
       case 'Nov':
         {
           monthNb = 11;
-          // notifyListeners();
         }
         break;
       case 'Dec':
         {
           monthNb = 12;
-          // notifyListeners();
         }
         break;
     }
+    Provider.of<Activities>(context, listen: false).setMonthActivities(monthNb);
   }
 }

@@ -14,7 +14,6 @@ class ActivitiesDb with ChangeNotifier {
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('activity.db');
-    notifyListeners();
 
     return _database!;
   }
@@ -46,7 +45,6 @@ class ActivitiesDb with ChangeNotifier {
   Future<Activity> create(Activity activity) async {
     final db = await instance.database;
     final id = await db.insert(tableActivity, activity.toJson());
-    notifyListeners();
 
     return activity.copy(id: id);
   }
@@ -62,7 +60,6 @@ class ActivitiesDb with ChangeNotifier {
     } else {
       throw Exception('ID $id not found');
     }
-    notifyListeners();
   }
 
   Future<Activity?> getLastActivityWhereType(String type) async {
@@ -80,8 +77,6 @@ class ActivitiesDb with ChangeNotifier {
         where: '${ActivityFields.id}= ? ',
         whereArgs: [id]);
 
-    notifyListeners();
-
     return Activity.fromJson(maps.first);
   }
 
@@ -95,7 +90,7 @@ class ActivitiesDb with ChangeNotifier {
       return null;
     } else {
       id = (idR.toList()[0].values.first as int);
-      notifyListeners();
+
       return id;
     }
   }
@@ -108,7 +103,6 @@ class ActivitiesDb with ChangeNotifier {
       where: '${ActivityFields.id} = ?',
       whereArgs: [id],
     );
-    notifyListeners();
   }
 
   void deleteActivity(int id) async {
@@ -116,13 +110,11 @@ class ActivitiesDb with ChangeNotifier {
     var count =
         await db.rawDelete('DELETE FROM $tableActivity WHERE _id = ?', [id]);
     dev.log('$count');
-    notifyListeners();
   }
 
   void clean() async {
     final db = await instance.database;
     db.delete(tableActivity);
-    notifyListeners();
 
     //await db.execute("DROP TABLE IF EXISTS $tableActivity");
   }
@@ -152,14 +144,12 @@ class ActivitiesDb with ChangeNotifier {
         columns: ActivityFields.values,
         where: '${ActivityFields.date}= ? ',
         whereArgs: [today_date]);
-    notifyListeners();
 
     return result.map((json) => Activity.fromJson(json)).toList();
   }
 
   Future close() async {
     final db = await instance.database;
-    notifyListeners();
 
     // db.close();
   }

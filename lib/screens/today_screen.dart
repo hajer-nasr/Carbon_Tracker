@@ -3,7 +3,6 @@ import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:location/location.dart' as loc;
 import 'package:intl/intl.dart';
 import 'package:location_distance_calculator/location_distance_calculator.dart';
@@ -18,8 +17,6 @@ class TodayScreen extends StatefulWidget {
 }
 
 class _TodayScreenState extends State<TodayScreen> {
-  bool _activityPermission = false;
-  bool _locationPermission = false;
   bool isLoading = false;
 
   List<ActivityModel.Activity>? activities;
@@ -34,6 +31,7 @@ class _TodayScreenState extends State<TodayScreen> {
 
   Future refreshPage() async {
     setState(() => isLoading = true);
+    dev.log("refresh fel today screen");
     this.activities = await ActivitiesDb.instance.readToday();
     setState(() {
       isLoading = false;
@@ -92,22 +90,26 @@ class _TodayScreenState extends State<TodayScreen> {
         if (activity.toJson()['type'].toString().contains('.WALKING') ||
             activity.toJson()['type'].toString().contains('UNKNOWN')) {
           actType = 'Walk';
-          carb = _distance! * 0.035;
+           carb = _distance! * 0.035;
+
         } else if (activity
             .toJson()['type']
             .toString()
             .contains('ON_BICYCLE')) {
           actType = 'Bicycle';
-          carb = _distance! * 0.019;
+           carb = _distance! * 0.019;
+
         } else if (activity
             .toJson()['type']
             .toString()
             .contains('IN_VEHICLE')) {
           actType = 'Car';
-          carb = _distance! * 0.17;
+           carb = _distance! * 0.17;
+
         } else if (activity.toJson()['type'].toString().contains('RUNNING')) {
           actType = 'Running';
           carb = _distance! * 0.012;
+
         } else if (activity.toJson()['type'].toString().contains('STILL')) {
           actType = 'Still';
         }
@@ -117,12 +119,20 @@ class _TodayScreenState extends State<TodayScreen> {
       }
       setState(() {
         _activityType = actType;
-        if (_carbon != 0.0 && _distance != 0.0) {
-          _carbon = carb / 1000;
-          _distance = _distance! / 1000;
+        if (_activityType != 'Still') {
+          if (_activityType != 'Walk') {
+            dev.log('carb $carb');
+            _distance = _distance! / 1000;
+            _carbon = carb / 1000;
+          }
+          if (_activityType == 'Walk' ) {
+            dev.log('carb walk $carb');
+            _distance = _distance! ;
+            _carbon = carb;
+          }
         }
       });
-      if (_activityType != 'Still' && _distance! >= 0.1) {
+      if (_activityType != 'Still') {
         lastActivity = await ActivitiesDb.instance
             .getLastActivityWhereType(_activityType!);
         lastId = await ActivitiesDb.instance.getLastIdWhereType(_activityType!);
@@ -139,9 +149,8 @@ class _TodayScreenState extends State<TodayScreen> {
         }
         // Activity Exists before 10mins
         if (_dateTime!
-                .difference(DateTime.parse(lastActivity!.dateTime))
-                .inMinutes <=
-            10) {
+            .difference(DateTime.parse(lastActivity!.dateTime))
+            .inMinutes <= 10) {
           double new_carbon = lastActivity!.carbon + _carbon!;
           double new_distance = lastActivity!.distance + _distance!;
           updatedActivity = ActivityModel.Activity(
@@ -152,18 +161,21 @@ class _TodayScreenState extends State<TodayScreen> {
               distance: new_distance,
               dateTime: lastActivity!.dateTime);
           await ActivitiesDb.instance.update(updatedActivity!, lastId!);
+          dev.log("update");
           refreshPage();
         }
         // Activity Exists but too far
         else {
-          addActivity(
-              DateFormat('EEE d MMM ').format(_dateTime!),
-              DateFormat(' kk:mm').format(_dateTime!),
-              _activityType,
-              _distance,
-              _carbon,
-              _dateTime.toString());
-          refreshPage();
+          if (_distance != null) {
+            addActivity(
+                DateFormat('EEE d MMM ').format(_dateTime!),
+                DateFormat(' kk:mm').format(_dateTime!),
+                _activityType,
+                _distance,
+                _carbon,
+                _dateTime.toString());
+            refreshPage();
+          }
         }
       }
     }
@@ -173,65 +185,11 @@ class _TodayScreenState extends State<TodayScreen> {
     dev.log('Catch Error >> $error');
   }
 
-  void _getLocationPermission() async {
-    var status = await Permission.location.status;
-    if (await Permission.location.status.isGranted) {
-      setState(() {
-        _locationPermission = true;
-        print(_locationPermission);
-        print(_activityPermission);
-      });
-    } else if (await Permission.location.status.isDenied) {
-      Map<Permission, PermissionStatus> status =
-          await [Permission.location].request();
-      if (await Permission.location.status.isGranted) {
-        setState(() {
-          _locationPermission = true;
-        });
-      }
-      if (await Permission.location.isPermanentlyDenied) {
-        openAppSettings();
-        if (await Permission.location.status.isGranted) {
-          setState(() {
-            _locationPermission = true;
-          });
-        }
-      }
-    }
-  }
-
-  void _getActivityPermission() async {
-    if (await Permission.activityRecognition.isGranted) {
-      setState(() {
-        _activityPermission = true;
-      });
-    } else if (await Permission.activityRecognition.isDenied) {
-      Map<Permission, PermissionStatus> status =
-          await [Permission.activityRecognition].request();
-      if (await Permission.activityRecognition.status.isGranted) {
-        setState(() {
-          _activityPermission = true;
-        });
-      }
-
-      if (await Permission.activityRecognition.isPermanentlyDenied) {
-        openAppSettings();
-        if (await Permission.activityRecognition.status.isGranted) {
-          print("Location is Granted");
-          setState(() {
-            _activityPermission = true;
-          });
-        }
-      }
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     refreshPage();
-    _getLocationPermission();
-    _getActivityPermission();
+
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
         final activityRecognition = FlutterActivityRecognition.instance;
@@ -252,155 +210,162 @@ class _TodayScreenState extends State<TodayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () => refreshPage(),
-      child: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Container(
-              width: 330,
-              child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: activities?.length,
-                  itemBuilder: (ctx, index) {
-                    return Container(
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                        elevation: 10,
-                        margin: const EdgeInsets.all(5),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding:
-                                  EdgeInsets.only(left: 5, bottom: 5, top: 5),
-                              child: MaterialButton(
-                                minWidth: 40,
-                                onPressed: () {},
-                                color: Colors.grey.shade200,
-                                textColor: Colors.white,
-                                padding: const EdgeInsets.all(6),
-                                // shape: RoundedRectangleBorder(
-                                //   borderRadius: BorderRadius.circular(5),
-                                // ),
-                                shape: const CircleBorder(),
-
-                                child: ((() {
-                                  switch (activities?[index].type) {
-                                    case 'Walk':
-                                      {
-                                        return const Icon(
-                                          Icons.directions_walk,
-                                          color: Colors.black,
-                                          size: 30,
-                                        );
-                                      }
-                                    case 'Running':
-                                      {
-                                        return const Icon(
-                                          Icons.directions_run,
-                                          color: Colors.black,
-                                          size: 30,
-                                        );
-                                      }
-                                    case 'Bicycle':
-                                      {
-                                        return const Icon(
-                                          Icons.directions_bike,
-                                          color: Colors.black,
-                                          size: 30,
-                                        );
-                                      }
-                                    case 'Car':
-                                      {
-                                        return const Icon(
-                                          Icons.directions_car,
-                                          color: Colors.black,
-                                          size: 30,
-                                        );
-                                      }
-                                  }
-                                }())),
-                              ),
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Container(
+            //    width: 330,
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: activities?.length,
+                itemBuilder: (ctx, index) {
+                  return Container(
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      elevation: 5,
+                      margin: const EdgeInsets.fromLTRB(18, 15, 18, 10),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding:
+                                EdgeInsets.only(left: 5, bottom: 5, top: 5),
+                            child: MaterialButton(
+                              minWidth: 40,
+                              onPressed: () {},
+                              color: Colors.grey.shade200,
+                              textColor: Colors.white,
+                              padding: const EdgeInsets.all(6),
+                              shape: const CircleBorder(),
+                              child: ((() {
+                                switch (activities?[index].type) {
+                                  case 'Walk':
+                                    {
+                                      return const Icon(
+                                        Icons.directions_walk,
+                                        color: Colors.black,
+                                        size: 30,
+                                      );
+                                    }
+                                  case 'Running':
+                                    {
+                                      return const Icon(
+                                        Icons.directions_run,
+                                        color: Colors.black,
+                                        size: 30,
+                                      );
+                                    }
+                                  case 'Bicycle':
+                                    {
+                                      return const Icon(
+                                        Icons.directions_bike,
+                                        color: Colors.black,
+                                        size: 30,
+                                      );
+                                    }
+                                  case 'Car':
+                                    {
+                                      return const Icon(
+                                        Icons.directions_car,
+                                        color: Colors.black,
+                                        size: 30,
+                                      );
+                                    }
+                                }
+                              }())),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, bottom: 1, top: 8),
-                                  child: Text(
-                                    '${activities?[index].type}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18),
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.only(
-                                          left: 10, right: 7, bottom: 1),
-                                      child: const Icon(Icons.access_time,
-                                          size: 19),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.only(bottom: 1),
-                                      child: Text(
-                                        'At ${activities?[index].time} ',
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.only(
-                                          left: 10, right: 7, bottom: 1),
-                                      child: const Icon(
-                                        Icons.moving,
-                                        size: 19,
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.only(bottom: 1),
-                                      child: Text(
-                                        'For ${activities?[index].distance.toStringAsFixed(1)} km.',
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Container(
-                              padding: const EdgeInsets.only(
-                                  top: 15, bottom: 15, left: 35),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    ' ${activities?[index].carbon.toStringAsFixed(2)} kg ',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.only(
+                                    left: 10, bottom: 1, top: 8),
+                                child: Text(
+                                  '${activities?[index].type}',
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.bold,
+                                      fontSize: 18),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.only(
+                                        left: 10, right: 7, bottom: 1),
+                                    child: const Icon(Icons.access_time,
+                                        size: 19),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.only(bottom: 1),
+                                    child: Text(
+                                      'At ${activities?[index].time} ',
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   ),
-                                  const Text('CO²  ',
-                                      style: TextStyle(
-                                        fontSize: 13.0,
-                                      )),
                                 ],
                               ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.only(
+                                        left: 10, right: 7, bottom: 1),
+                                    child: const Icon(
+                                      Icons.moving,
+                                      size: 19,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.only(bottom: 1),
+                                    child:
+                                    activities?[index].type == 'Walk' ?
+                                    Text(
+                                      'For ${activities?[index].distance.toStringAsFixed(1)} m.',
+                                      style: const TextStyle(fontSize: 14),
+                                    ) :  Text(
+                                      'For ${activities?[index].distance.toStringAsFixed(1)} km.',
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.only(
+                                top: 15, bottom: 15, left: 35),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                activities?[index].type == 'Walk' ?
+                                Text(
+                                  ' ${activities?[index].carbon.toStringAsFixed(2)} g ',
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ) :
+                                Text(
+                                  ' ${activities?[index].carbon.toStringAsFixed(2)} kg ',
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                const Text('CO²  ',
+                                    style: TextStyle(
+                                      fontSize: 13.0,
+                                    )),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  })
-              //),
-              ),
-    );
+                    ),
+                  );
+                })
+            //),
+            );
   }
 }

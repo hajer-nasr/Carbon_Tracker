@@ -1,6 +1,5 @@
 import 'package:carbon_tracker/screens/exampleApp.dart';
 import 'package:carbon_tracker/screens/home.dart';
-import 'package:carbon_tracker/widgets/distanceTracking.dart';
 import 'package:carbon_tracker/widgets/tabs_screen.data.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -15,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         initialRoute: "/",
         theme: ThemeData(

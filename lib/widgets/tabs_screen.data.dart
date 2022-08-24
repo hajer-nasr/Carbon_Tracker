@@ -5,6 +5,9 @@ import 'package:carbon_tracker/screens/home.dart';
 import 'package:carbon_tracker/widgets/historic_chart.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/activities_provider.dart';
 
 class TabScreen extends StatefulWidget {
   @override
@@ -27,10 +30,10 @@ class _TabScreenState extends State<TabScreen> {
         'page': Historic(),
         'title': 'Historic',
       },
-      {
-        'page': HistoricChart(),
-        'title': 'Goals',
-      },
+      // {
+      //   'page': HistoricChart(),
+      //   'title': 'Goals',
+      // },
     ];
     super.initState();
   }
@@ -43,27 +46,34 @@ class _TabScreenState extends State<TabScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body:
-          IndexedStack(index:_selectedPageIndex , children: [Home(), Historic()
-          , GoalsScreen()
-          ],),
-   //   _pages[_selectedPageIndex]['page'] as Widget,
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: _selectPage,
-        backgroundColor: Colors.white,
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Theme.of(context).primaryColor,
-        currentIndex: _selectedPageIndex,
-        selectedFontSize: 16,
-        unselectedFontSize: 13,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.pie_chart), label: 'Track'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.trending_down), label: 'Historic'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.track_changes), label: 'Goals'),
-        ],
+    return ChangeNotifierProvider(
+      create: (BuildContext context) => Activities(),
+      child: Scaffold(
+        body: IndexedStack(
+          index: _selectedPageIndex,
+          children: [
+            Home(), Historic()
+            //  , GoalsScreen()
+          ],
+        ),
+        //   _pages[_selectedPageIndex]['page'] as Widget,
+        bottomNavigationBar: BottomNavigationBar(
+          onTap: _selectPage,
+          backgroundColor: Colors.white,
+          unselectedItemColor: Colors.grey,
+          selectedItemColor: Theme.of(context).primaryColor,
+          currentIndex: _selectedPageIndex,
+          selectedFontSize: 16,
+          unselectedFontSize: 13,
+          items: const [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.pie_chart), label: 'Track'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.trending_down), label: 'Historic'),
+            // BottomNavigationBarItem(
+            //     icon: Icon(Icons.track_changes), label: 'Goals'),
+          ],
+        ),
       ),
     );
   }
