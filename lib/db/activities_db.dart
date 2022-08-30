@@ -121,19 +121,25 @@ class ActivitiesDb with ChangeNotifier {
 
   Future<List<Activity>> readAll() async {
     final db = await instance.database;
-
     final result = await db.query(tableActivity);
     return result.map((json) => Activity.fromJson(json)).toList();
   }
 
+  Future<List<Map<String, Object?>>> getTotalWalk() async {
+    final db = await instance.database;
+    final result = await db.rawQuery(
+        'SELECT SUM(Carbon) AS TOTAL FROM $tableActivity WHERE type = ?',
+        ['Walk']);
+    return result.toList();
+  }
+
   Future<List<Map<String, Object?>>> getTotal() async {
     final db = await instance.database;
-    final result =
-        await db.rawQuery('SELECT SUM(Carbon) AS TOTAL FROM $tableActivity');
+    final result = await db.rawQuery(
+        'SELECT SUM(Carbon) AS TOTAL FROM $tableActivity WHERE type != ?',
+        ['Walk']);
 
-    //dev.log('${result.toList()}');
     return result.toList();
-    //final result = await db.query(tableActivity);
   }
 
   Future<List<Activity>> readToday() async {

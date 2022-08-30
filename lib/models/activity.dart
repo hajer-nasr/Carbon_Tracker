@@ -35,16 +35,15 @@ class Activity {
   final double carbon;
   final String dateTime;
 
-  const Activity(
-      {
-      // required this.id,
-      required this.date,
-      required this.time,
-      required this.type,
-      required this.carbon,
-      required this.distance,
-        required this.dateTime,
-      });
+  const Activity({
+    // required this.id,
+    required this.date,
+    required this.time,
+    required this.type,
+    required this.carbon,
+    required this.distance,
+    required this.dateTime,
+  });
 
   Activity copy(
           {int? id,

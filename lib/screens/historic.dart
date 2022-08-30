@@ -59,106 +59,106 @@ class _HistoricState extends State<Historic> {
     await ActivitiesDb.instance.create(act);
   }
 
-  void _onActivityReceive(Activity activity) async {
-    dev.log('Activity Detected >> ${activity.toJson()}');
-    _activityStreamController.sink.add(activity);
-    if (_startLocation == null) {
-      var startLoc = await loc.Location().getLocation();
-      setState(() {
-        _startLocation = startLoc;
-        dev.log('Start Location >> $_startLocation');
-        _dateTime = DateTime.now();
-      });
-    }
-    if (_startLocation != null) {
-      var actType;
-      var carb;
-      _endLocation = await loc.Location().getLocation();
-      try {
-        _distance = await (LocationDistanceCalculator().distanceBetween(
-            _startLocation!.latitude!,
-            _startLocation!.longitude!,
-            _endLocation!.latitude!,
-            _endLocation!.longitude!));
-        if (activity.toJson()['type'].toString().contains('.WALKING') ||
-            activity.toJson()['type'].toString().contains('UNKNOWN')) {
-          actType = 'Walk';
-          carb = _distance! * 0.035;
-        } else if (activity
-            .toJson()['type']
-            .toString()
-            .contains('ON_BICYCLE')) {
-          actType = 'Bicycle';
-          carb = _distance! * 0.019;
-        } else if (activity
-            .toJson()['type']
-            .toString()
-            .contains('IN_VEHICLE')) {
-          actType = 'Car';
-          carb = _distance! * 0.17;
-        } else if (activity.toJson()['type'].toString().contains('RUNNING')) {
-          actType = 'Running';
-          carb = _distance! * 0.012;
-        } else if (activity.toJson()['type'].toString().contains('STILL')) {
-          actType = 'Still';
-        }
-        dev.log('End Location >> $_endLocation');
-      } on PlatformException {
-        _distance = -1.0;
-      }
-      setState(() {
-        _activityType = actType;
-        if (_carbon != 0.0 && _distance != 0.0) {
-          _carbon = carb / 1000;
-          _distance = _distance! / 1000;
-        }
-      });
-      if (_activityType != 'Still' && _distance! >= 0.1) {
-        lastActivity = await ActivitiesDb.instance
-            .getLastActivityWhereType(_activityType!);
-        lastId = await ActivitiesDb.instance.getLastIdWhereType(_activityType!);
-        // Activity Does Not Exist
-        if (lastId == null && lastActivity == null) {
-          addActivity(
-              DateFormat('EEE d MMM ').format(_dateTime!),
-              DateFormat(' kk:mm').format(_dateTime!),
-              _activityType,
-              _distance,
-              _carbon,
-              _dateTime.toString());
-          refreshPage();
-        }
-        // Activity Exists before 10mins
-        if (_dateTime!
-                .difference(DateTime.parse(lastActivity!.dateTime))
-                .inMinutes <=
-            10) {
-          double new_carbon = lastActivity!.carbon + _carbon!;
-          double new_distance = lastActivity!.distance + _distance!;
-          updatedActivity = ActivityModel.Activity(
-              date: lastActivity!.date,
-              time: lastActivity!.time,
-              type: lastActivity!.type,
-              carbon: new_carbon,
-              distance: new_distance,
-              dateTime: lastActivity!.dateTime);
-          await ActivitiesDb.instance.update(updatedActivity!, lastId!);
-          refreshPage();
-        }
-        // Activity Exists but too far
-        else {
-          addActivity(
-              DateFormat('EEE d MMM ').format(_dateTime!),
-              DateFormat(' kk:mm').format(_dateTime!),
-              _activityType,
-              _distance,
-              _carbon,
-              _dateTime.toString());
-          refreshPage();
-        }
-      }
-    }
-  }
+  // void _onActivityReceive(Activity activity) async {
+  //   dev.log('Activity Detected >> ${activity.toJson()}');
+  //   _activityStreamController.sink.add(activity);
+  //   if (_startLocation == null) {
+  //     var startLoc = await loc.Location().getLocation();
+  //     setState(() {
+  //       _startLocation = startLoc;
+  //       dev.log('Start Location >> $_startLocation');
+  //       _dateTime = DateTime.now();
+  //     });
+  //   }
+  //   if (_startLocation != null) {
+  //     var actType;
+  //     var carb;
+  //     _endLocation = await loc.Location().getLocation();
+  //     try {
+  //       _distance = await (LocationDistanceCalculator().distanceBetween(
+  //           _startLocation!.latitude!,
+  //           _startLocation!.longitude!,
+  //           _endLocation!.latitude!,
+  //           _endLocation!.longitude!));
+  //       if (activity.toJson()['type'].toString().contains('.WALKING') ||
+  //           activity.toJson()['type'].toString().contains('UNKNOWN')) {
+  //         actType = 'Walk';
+  //         carb = _distance! * 0.035;
+  //       } else if (activity
+  //           .toJson()['type']
+  //           .toString()
+  //           .contains('ON_BICYCLE')) {
+  //         actType = 'Bicycle';
+  //         carb = _distance! * 0.019;
+  //       } else if (activity
+  //           .toJson()['type']
+  //           .toString()
+  //           .contains('IN_VEHICLE')) {
+  //         actType = 'Car';
+  //         carb = _distance! * 0.17;
+  //       } else if (activity.toJson()['type'].toString().contains('RUNNING')) {
+  //         actType = 'Running';
+  //         carb = _distance! * 0.012;
+  //       } else if (activity.toJson()['type'].toString().contains('STILL')) {
+  //         actType = 'Still';
+  //       }
+  //       dev.log('End Location >> $_endLocation');
+  //     } on PlatformException {
+  //       _distance = -1.0;
+  //     }
+  //     setState(() {
+  //       _activityType = actType;
+  //       if (_carbon != 0.0 && _distance != 0.0) {
+  //         _carbon = carb / 1000;
+  //         _distance = _distance! / 1000;
+  //       }
+  //     });
+  //     if (_activityType != 'Still' && _distance! >= 0.1) {
+  //       lastActivity = await ActivitiesDb.instance
+  //           .getLastActivityWhereType(_activityType!);
+  //       lastId = await ActivitiesDb.instance.getLastIdWhereType(_activityType!);
+  //       // Activity Does Not Exist
+  //       if (lastId == null && lastActivity == null) {
+  //         addActivity(
+  //             DateFormat('EEE d MMM ').format(_dateTime!),
+  //             DateFormat(' kk:mm').format(_dateTime!),
+  //             _activityType,
+  //             _distance,
+  //             _carbon,
+  //             _dateTime.toString());
+  //         refreshPage();
+  //       }
+  //       // Activity Exists before 10mins
+  //       if (_dateTime!
+  //               .difference(DateTime.parse(lastActivity!.dateTime))
+  //               .inMinutes <=
+  //           10) {
+  //         double new_carbon = lastActivity!.carbon + _carbon!;
+  //         double new_distance = lastActivity!.distance + _distance!;
+  //         updatedActivity = ActivityModel.Activity(
+  //             date: lastActivity!.date,
+  //             time: lastActivity!.time,
+  //             type: lastActivity!.type,
+  //             carbon: new_carbon,
+  //             distance: new_distance,
+  //             dateTime: lastActivity!.dateTime);
+  //         await ActivitiesDb.instance.update(updatedActivity!, lastId!);
+  //         refreshPage();
+  //       }
+  //       // Activity Exists but too far
+  //       else {
+  //         addActivity(
+  //             DateFormat('EEE d MMM ').format(_dateTime!),
+  //             DateFormat(' kk:mm').format(_dateTime!),
+  //             _activityType,
+  //             _distance,
+  //             _carbon,
+  //             _dateTime.toString());
+  //         refreshPage();
+  //       }
+  //     }
+  //   }
+  // }
 
   void _handleError(dynamic error) {
     print('Catch Error >> $error');
@@ -178,56 +178,50 @@ class _HistoricState extends State<Historic> {
     super.initState();
     refreshPage();
 
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) async {
-        final activityRecognition = FlutterActivityRecognition.instance;
-        _activityStreamSubscription = activityRecognition.activityStream
-            .handleError(_handleError)
-            .listen(_onActivityReceive);
-      },
-    );
+    // WidgetsBinding.instance.addPostFrameCallback(
+    //   (_) async {
+    //     final activityRecognition = FlutterActivityRecognition.instance;
+    //     _activityStreamSubscription = activityRecognition.activityStream
+    //         .handleError(_handleError)
+    //         .listen(_onActivityReceive);
+    //   },
+    // );
   }
-
-  //
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text("Carbon Tracker"),
-          elevation: 0,
-        ),
-        body: ListView(children: [
-          Container(
-            child: Column(
-              // mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: MediaQuery.of(context).size.height,
-                  alignment: Alignment.topLeft,
-                  decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                    colors: [
-                      Color.fromRGBO(3, 96, 99, 1),
-                      Color.fromRGBO(3, 96, 99, 0.8)
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomRight,
-                    stops: [0, 0.8],
-                  )),
-                  //height: 2000,
-                  child: Column(
-                    //     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      HistoricChart(),
-                      //   Expanded(child: GoalsScreen()),
-                      Expanded(child: HistoricScreen()),
-                    ],
-                  ),
-                ),
-              ],
+    return SingleChildScrollView(
+      child: Container(
+        color: Color.fromRGBO(3, 96, 99, 1),
+        child: Column(
+          // mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.all(15),
+              child: Text(
+                'Carbon Tracker',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w500),
+              ),
             ),
-          ),
-        ]));
+            Container(
+              height: MediaQuery.of(context).size.height,
+              alignment: Alignment.topLeft,
+              color: Color.fromRGBO(3, 95, 99, 1),
+              child: Column(
+                //     mainAxisSize: MainAxisSize.min,
+                children: [
+                  //       HistoricChart(),
+                  //   Expanded(child: GoalsScreen()),
+                  Expanded(child: HistoricScreen()),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -1,8 +1,9 @@
-import 'package:carbon_tracker/screens/exampleApp.dart';
 import 'package:carbon_tracker/screens/home.dart';
 import 'package:carbon_tracker/widgets/tabs_screen.data.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,19 +14,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Color.fromRGBO(3, 96, 99, 1)
+    ));
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         initialRoute: "/",
         theme: ThemeData(
-          primarySwatch: Colors.teal,
-        ),
+            colorScheme: ColorScheme.fromSwatch()
+                .copyWith(primary: Color.fromRGBO(3, 96, 99, 1))),
         routes: {
           "/": (BuildContext context) {
-            //return (Home());
-            //  return(DistanceTracking());
-         //   return (ExampleApp());
-            return(TabScreen());
+            return (TabScreen());
           },
         });
   }
