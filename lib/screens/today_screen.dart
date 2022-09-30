@@ -62,6 +62,7 @@ class _TodayScreenState extends State<TodayScreen> {
     _distance,
     _carbon,
     dateTime,
+      year,
   ) async {
     final act = ActivityModel.Activity(
       //id: 132,
@@ -71,6 +72,7 @@ class _TodayScreenState extends State<TodayScreen> {
       distance: _distance,
       carbon: _carbon,
       dateTime: dateTime,
+      // year:year
     );
     await ActivitiesDb.instance.create(act);
   }
@@ -147,7 +149,7 @@ class _TodayScreenState extends State<TodayScreen> {
               await ActivitiesDb.instance.getLastIdWhereType(_activityType!);
           // Activity Does Not Exist
           if (lastId == null && lastActivity == null) {
-
+            if (_distance != 0.0) {
               await Provider.of<Activities>(context, listen: false).add(
                   ActivityModel.Activity(
                       date: DateFormat('EEE d MMM ').format(_dateTime!),
@@ -155,11 +157,13 @@ class _TodayScreenState extends State<TodayScreen> {
                       type: _activityType!,
                       carbon: _carbon!,
                       distance: _distance!,
-                      dateTime: _dateTime.toString()));
+                      dateTime: _dateTime.toString(),
+                      // year: _dateTime!.year.toString()
+                  ));
               setState(() {
                 _startLocation = _endLocation;
               });
-
+            }
           }
           // Activity Exists before 10mins
           if (_dateTime!
@@ -174,7 +178,9 @@ class _TodayScreenState extends State<TodayScreen> {
                 type: lastActivity!.type,
                 carbon: new_carbon,
                 distance: new_distance,
-                dateTime: lastActivity!.dateTime);
+                dateTime: lastActivity!.dateTime,
+                // year: lastActivity!.year
+            );
 
             Provider.of<Activities>(context, listen: false)
                 .update(updatedActivity!, lastId!);
@@ -185,7 +191,7 @@ class _TodayScreenState extends State<TodayScreen> {
           // Activity Exists but too far
           else {
             if (_distance != null) {
-
+              if (_distance != 0.0) {
                 Provider.of<Activities>(context, listen: false).add(
                     ActivityModel.Activity(
                         date: DateFormat('EEE d MMM ').format(_dateTime!),
@@ -193,11 +199,13 @@ class _TodayScreenState extends State<TodayScreen> {
                         type: _activityType!,
                         carbon: _carbon!,
                         distance: _distance!,
-                        dateTime: _dateTime.toString()));
+                        dateTime: _dateTime.toString(),
+                    //    year: _dateTime!.year.toString()
+                    ));
                 setState(() {
                   _startLocation = _endLocation;
                 });
-
+              }
             }
           }
         }
@@ -233,7 +241,6 @@ class _TodayScreenState extends State<TodayScreen> {
   @override
   void initState() {
     super.initState();
-    //  refreshPage();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
         final activityRecognition = FlutterActivityRecognition.instance;
@@ -265,12 +272,6 @@ class _TodayScreenState extends State<TodayScreen> {
     return distanceWalking!;
   }
 
-  // @override
-  // void dispose() {
-  //   _activityStreamController.close();
-  //   _activityStreamSubscription?.cancel();
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -335,12 +336,10 @@ class _TodayScreenState extends State<TodayScreen> {
                                 .length,
                             itemBuilder: (ctx, index) {
                               return Row(
-                                // ROW KBIIIIR
                                 children: [
                                   Expanded(
                                     flex: 5,
                                     child: Row(
-                                      // ROW ICON AND TYPE
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
@@ -431,7 +430,6 @@ class _TodayScreenState extends State<TodayScreen> {
                                   Expanded(
                                     flex: 5,
                                     child: Row(
-                                      // ROW DISTANCE AND CARBON
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
@@ -451,7 +449,6 @@ class _TodayScreenState extends State<TodayScreen> {
                                                 style: const TextStyle(
                                                     fontSize: 15),
                                               ),
-                                        //     SizedBox(width: 10,),
                                         Expanded(
                                           flex: 4,
                                           child: Row(

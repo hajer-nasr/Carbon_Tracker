@@ -13,41 +13,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  bool _activityPermission = false;
-  bool _locationPermission = false;
 
-  // void _getActivityPermission() async {
-  //   if (await Permission.activityRecognition.isGranted) {
-  //     setState(() {
-  //       _activityPermission = true;
-  //     });
-  //   } else if (await Permission.activityRecognition.isDenied) {
-  //     Map<Permission, PermissionStatus> status =
-  //         await [Permission.activityRecognition].request();
-  //     if (await Permission.activityRecognition.status.isGranted) {
-  //       setState(() {
-  //         _activityPermission = true;
-  //       });
-  //     }
-  //
-  //     if (await Permission.activityRecognition.isPermanentlyDenied) {
-  //       openAppSettings();
-  //       if (await Permission.activityRecognition.status.isGranted) {
-  //         print("Location is Granted");
-  //         setState(() {
-  //           _activityPermission = true;
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
-  //
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   //_getActivityPermission();
-  //
-  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +37,6 @@ class _HomeState extends State<Home> {
               height: MediaQuery.of(context).size.height,
               alignment: Alignment.topLeft,
               color: Color.fromRGBO(0, 150, 136, 1),
-              //height: 2000,
               child: Column(
                 children: [
                   TodayChart(),

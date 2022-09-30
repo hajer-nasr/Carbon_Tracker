@@ -1,4 +1,3 @@
-import 'package:carbon_tracker/screens/goals_screen.dart';
 import 'package:carbon_tracker/screens/historic.dart';
 
 import 'package:carbon_tracker/screens/home.dart';
@@ -30,10 +29,7 @@ class _TabScreenState extends State<TabScreen> {
         'page': Historic(),
         'title': 'Historic',
       },
-      // {
-      //   'page': HistoricChart(),
-      //   'title': 'Goals',
-      // },
+
     ];
     super.initState();
   }
@@ -58,7 +54,6 @@ class _TabScreenState extends State<TabScreen> {
               //  GoalsScreen()
             ],
           ),
-          //   _pages[_selectedPageIndex]['page'] as Widget,
           extendBody: true,
           backgroundColor: Colors.transparent,
 
@@ -79,8 +74,7 @@ class _TabScreenState extends State<TabScreen> {
                   icon: (Icons.donut_small_outlined), title: 'Track'),
               FloatingNavbarItem(
                   icon: (Icons.pending_actions_outlined), title: 'Historic'),
-              // BottomNavigationBarItem(
-              //     icon: Icon(Icons.track_changes), label: 'Goals'),
+
             ],
           ),
         ),

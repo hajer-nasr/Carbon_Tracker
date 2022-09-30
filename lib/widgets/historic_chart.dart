@@ -1,6 +1,5 @@
 import 'dart:core';
 import 'dart:async';
-import 'package:carbon_tracker/widgets/historic_screen.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:carbon_tracker/models/activity.dart' as ActivityModel;
 import 'dart:developer' as dev;
 
-import '../db/activities_db.dart';
 import '../providers/activities_provider.dart';
 
 class HistoricChart extends StatefulWidget with ChangeNotifier {
@@ -28,9 +26,7 @@ class ChartData {
 }
 
 class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
-  void _handleError(dynamic error) {
-    dev.log('Catch Error >> $error');
-  }
+
 
   @override
   void dispose() {
@@ -88,24 +84,10 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
     super.didChangeDependencies();
   }
 
-  // Future refreshPage() async {
-  //   setState(() => isLoading = false);
-  //
-  //   if (_isInit) {
-  //     activities =
-  //         await Provider.of<Activities>(context, listen: false).allActivities();
-  //     taux = await Provider.of<Activities>(context, listen: false).tauxFunc();
-  //     await Provider.of<Activities>(context, listen: false).totalMonths();
-  //
-  //     isLoading = false;
-  //   }
-  //   ;
-  // }
-
   @override
   void initState() {
     _trackballBehavior = TrackballBehavior(
-      shouldAlwaysShow: true,
+        shouldAlwaysShow: true,
         enable: true,
         tooltipSettings: const InteractiveTooltip(
             textStyle: TextStyle(color: Colors.transparent),
@@ -117,7 +99,6 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
             markerVisibility: TrackballVisibilityMode.visible,
             borderColor: Colors.transparent));
     tooltipBehavior = TooltipBehavior(
-
       enable: true,
       shouldAlwaysShow: true,
     );
@@ -183,12 +164,10 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
                     alignment: AlignmentDirectional.topStart,
                     padding: const EdgeInsets.fromLTRB(25, 0, 20, 10),
                     child: Row(
-                      // ROW KBIIR LOUL
                       children: [
                         Expanded(
                           flex: 7,
                           child: Row(
-                            // ROW TOTAL PER YEAR
                             children: [
                               Column(
                                 children: [
@@ -219,7 +198,6 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
                         Expanded(
                           flex: 8,
                           child: Row(
-                            // ROW TAUX VARIATION PER MONTH
                             children: [
                               Container(
                                 alignment: Alignment.topLeft,
@@ -364,7 +342,7 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
                                         fontSize: 13),
                                   ),
                                   primaryYAxis: NumericAxis(
-                                      minimum: -0.02,
+                                      minimum: 0,
                                       labelFormat: '{value} Kg',
                                       majorTickLines:
                                           const MajorTickLines(size: 0),
@@ -375,7 +353,7 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
                                           width: 0.5, dashArray: [3, 10]),
                                       axisLine: const AxisLine(width: 0)),
                                   series: <ChartSeries>[
-                                    SplineSeries<ChartData, String>(
+                                    StackedLine100Series<ChartData, String>(
                                         dataSource: chartData,
                                         xValueMapper: (ChartData data, _) =>
                                             data.x,
@@ -397,7 +375,6 @@ class _HistoricChartState extends State<HistoricChart> with ChangeNotifier {
                                   ])),
                         ),
 
-                        //       Expanded(child: HistoricScreen()),
                       ],
                     ),
                   ),

@@ -6,6 +6,7 @@ class ActivityFields {
   static final List<String> values = [
     id,
     date,
+    //year,
     type,
     time,
     distance,
@@ -14,8 +15,9 @@ class ActivityFields {
   ];
 
   static final String id = '_id';
-
   static final String date = 'date';
+
+ // static final String year = 'year';
   static final String time = 'time';
   static final String type = 'type';
   static final String distance = 'distance';
@@ -24,9 +26,8 @@ class ActivityFields {
 }
 
 class Activity {
-  // final int id;
   final String date;
-
+  //final String year;
   final String time;
 
   final String type;
@@ -36,19 +37,20 @@ class Activity {
   final String dateTime;
 
   const Activity({
-    // required this.id,
     required this.date,
     required this.time,
     required this.type,
     required this.carbon,
     required this.distance,
     required this.dateTime,
+    //required this.year,
   });
 
   Activity copy(
           {int? id,
           String? date,
           String? time,
+        //  String? year,
           String? type,
           double? distance,
           double? carbon,
@@ -56,6 +58,7 @@ class Activity {
       Activity(
         date: this.date,
         time: this.time,
+       // year: this.year,
         type: this.type,
         carbon: this.carbon,
         distance: this.distance,
@@ -63,9 +66,10 @@ class Activity {
       );
 
   static Activity fromJson(Map<String, Object?> json) => Activity(
-        //   id: json[ActivityFields.id] as int,
         date: json[ActivityFields.date] as String,
         type: json[ActivityFields.type] as String,
+      //  year: json[ActivityFields.year] as String,
+
         time: json[ActivityFields.time] as String,
         carbon: json[ActivityFields.carbon] as double,
         distance: json[ActivityFields.distance] as double,
@@ -73,7 +77,7 @@ class Activity {
       );
 
   Map<String, Object?> toJson() => {
-        //ActivityFields.id: id,
+        //ActivityFields.year: year,
         ActivityFields.date: date,
         ActivityFields.time: time,
         ActivityFields.type: type,

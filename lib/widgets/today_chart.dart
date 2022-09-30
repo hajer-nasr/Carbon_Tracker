@@ -62,7 +62,6 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
     if (await Permission.location.status.isGranted) {
       setState(() {
         _locationPermission = true;
-
       });
     } else if (await Permission.location.status.isDenied) {
       Map<Permission, PermissionStatus> status =
@@ -83,18 +82,17 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
     }
   }
 
-  void askPermissions() async{
+  void askPermissions() async {
     await _getLocationPermission();
-    await  _getActivityPermission();
-   print(_activityPermission);
-   print(_locationPermission);
+    await _getActivityPermission();
+    print(_activityPermission);
+    print(_locationPermission);
   }
 
   @override
   void initState() {
     super.initState();
     askPermissions();
-
   }
 
   List<ActivityModel.Activity>? activities;
@@ -139,7 +137,7 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
       children: [
         Container(
             alignment: AlignmentDirectional.topCenter,
-            padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+            padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
             child: RichText(
               text: TextSpan(
                 text: "You have emitted  ",
@@ -153,14 +151,12 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
                 ],
               ),
             )),
-
         Card(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           elevation: 10,
           margin: const EdgeInsets.all(18),
           child: Column(
-            // mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Container(
                   padding: const EdgeInsets.fromLTRB(20, 15, 0, 0),
@@ -222,7 +218,6 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
                                   ),
                                 ),
                               ),
-                              //width: 100,
                               SizedBox(
                                 width: 8,
                               ),
@@ -261,7 +256,6 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
                               height: 60,
                               child: MaterialButton(
                                 minWidth: 38,
-                                // WIDTH ICON
                                 onPressed: () {},
                                 color: const Color(0XFF1A7285),
                                 textColor: Colors.white,
@@ -273,7 +267,6 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
                                 ),
                               ),
                             ),
-                            //width: 100,
                             SizedBox(
                               width: 8,
                             ),
@@ -325,7 +318,6 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
                             SizedBox(
                               width: 8,
                             ),
-                            //width: 100,
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -371,7 +363,6 @@ class _TodayChartState extends State<TodayChart> with ChangeNotifier {
                                 ),
                               ),
                             ),
-                            //width: 100,
                             SizedBox(
                               width: 8,
                             ),

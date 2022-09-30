@@ -85,7 +85,6 @@ class ActivitiesDb with ChangeNotifier {
     final db = await instance.database;
     final idR = await db
         .rawQuery('SELECT MAX(_id) FROM $tableActivity Where type= ?', [type]);
-    //dev.log('idR to List ${idR.toList().first.values.first}');
     if (idR.toList().first.values.first == null) {
       return null;
     } else {
@@ -116,7 +115,6 @@ class ActivitiesDb with ChangeNotifier {
     final db = await instance.database;
     db.delete(tableActivity);
 
-    //await db.execute("DROP TABLE IF EXISTS $tableActivity");
   }
 
   Future<List<Activity>> readAll() async {
@@ -157,6 +155,6 @@ class ActivitiesDb with ChangeNotifier {
   Future close() async {
     final db = await instance.database;
 
-    // db.close();
+     db.close();
   }
 }

@@ -146,7 +146,6 @@ class Activities with ChangeNotifier {
     total_this_month = 0.0;
     total_last_month = 0.0;
     tx = 0.0;
-    // taux=0.0;
     List<Activity> activities = await ActivitiesDb.instance.readAll();
     for (int i = 0; i < activities.length; i++) {
       DateTime activityDate = DateTime.parse(activities[i].dateTime);
@@ -171,10 +170,8 @@ class Activities with ChangeNotifier {
     } else if (total_last_month == 0.0) {
       tx = total_this_month;
     }
-    //dev.log('Last MONTH $total_last_month');
-    //dev.log('THIS MONTH $total_this_month');
+
     taux = tx;
-    // dev.log('TAUX $taux');
     return taux;
   }
 
@@ -322,7 +319,6 @@ class Activities with ChangeNotifier {
   void updateValues() async {
     totalDiffWalk = 0.0;
     totalWalk = 0.0;
-    // _totalYear = 0.0;
     var tot = 0.0;
     List<Map<String, Object?>>? listTotalDiffWalk =
         await ActivitiesDb.instance.getTotal();
@@ -342,7 +338,6 @@ class Activities with ChangeNotifier {
     _carbonCar = 0.0;
     _carbonWalk = 0.0;
     _total = 0.0;
-    dev.log('$_totalYear');
     actv = await todayActivities();
     for (var i = 0; i < actv.length; i++) {
       switch (actv[i].type) {
@@ -413,7 +408,6 @@ class Activities with ChangeNotifier {
     List<Activity> activities = await ActivitiesDb.instance.readToday();
 
     _todayActivities = activities;
-    // dev.log('$_todayActivities fel TodayActivities Provider');
     for (int i = 0; i < activities.length; i++) {
       activities.sort((a, b) {
         return (b.dateTime.compareTo(a.dateTime));

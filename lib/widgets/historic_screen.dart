@@ -168,19 +168,17 @@ class _HistoricScreenState extends State<HistoricScreen> {
         lastId = await ActivitiesDb.instance.getLastIdWhereType(_activityType!);
         // Activity Does Not Exist
         if (lastId == null && lastActivity == null) {
-
-            Provider.of<Activities>(context, listen: false).add(
-                ActivityModel.Activity(
-                    date: DateFormat('EEE d MMM ').format(_dateTime!),
-                    time: DateFormat(' kk:mm').format(_dateTime!),
-                    type: _activityType!,
-                    carbon: _carbon!,
-                    distance: _distance!,
-                    dateTime: _dateTime.toString()));
-            setState(() {
-              _startLocation = _endLocation;
-            });
-
+          Provider.of<Activities>(context, listen: false).add(
+              ActivityModel.Activity(
+                  date: DateFormat('EEE d MMM ').format(_dateTime!),
+                  time: DateFormat(' kk:mm').format(_dateTime!),
+                  type: _activityType!,
+                  carbon: _carbon!,
+                  distance: _distance!,
+                  dateTime: _dateTime.toString()));
+          setState(() {
+            _startLocation = _endLocation;
+          });
         }
         // Activity Exists before 10mins
         if (_dateTime!
@@ -205,19 +203,17 @@ class _HistoricScreenState extends State<HistoricScreen> {
         // Activity Exists but too far
         else {
           if (_distance != null) {
-
-              Provider.of<Activities>(context, listen: false).add(
-                  ActivityModel.Activity(
-                      date: DateFormat('EEE d MMM ').format(_dateTime!),
-                      time: DateFormat(' kk:mm').format(_dateTime!),
-                      type: _activityType!,
-                      carbon: _carbon!,
-                      distance: _distance!,
-                      dateTime: _dateTime.toString()));
-              setState(() {
-                _startLocation = _endLocation;
-              });
-
+            Provider.of<Activities>(context, listen: false).add(
+                ActivityModel.Activity(
+                    date: DateFormat('EEE d MMM ').format(_dateTime!),
+                    time: DateFormat(' kk:mm').format(_dateTime!),
+                    type: _activityType!,
+                    carbon: _carbon!,
+                    distance: _distance!,
+                    dateTime: _dateTime.toString()));
+            setState(() {
+              _startLocation = _endLocation;
+            });
           }
         }
       }
@@ -271,7 +267,8 @@ class _HistoricScreenState extends State<HistoricScreen> {
   }
 
   void delete() async {
-    for (var i = 11; i <= 12; i++) ActivitiesDb.instance.deleteActivity(i);
+    //for (var i = 11; i <= 12; i++)
+    ActivitiesDb.instance.deleteActivity(21);
   }
 
   void add() {
@@ -285,7 +282,9 @@ class _HistoricScreenState extends State<HistoricScreen> {
         distance: 30,
         dateTime: _dateTime.toString()));
   }
+
   String SelectedMonth = DateFormat('MMMM').format(DateTime.now());
+
   String getSelectedMonth(int nb) {
     switch (nb) {
       case 1:
@@ -388,198 +387,199 @@ class _HistoricScreenState extends State<HistoricScreen> {
                               fontSize: 18, fontWeight: FontWeight.w500),
                         ),
                       )
-                    : Text(""),
-                Provider.of<Activities>(context).activitiesMonth.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No activity detected in ${getSelectedMonth(Provider.of<Activities>(context).nbMonth)}.',
-                          style: TextStyle(
-                              fontSize: 15,
-                              color: Color.fromRGBO(3, 96, 99, 1),
-                              fontWeight: FontWeight.w500),
-                        ),
-                        heightFactor: 8,
-                        widthFactor: 10,
-                      )
-                    : Expanded(
-                        child: ListView.separated(
-                            separatorBuilder:
-                                (BuildContext context, int index) {
-                              return Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 5),
-                                child: Divider(
-                                  color: Color.fromRGBO(224, 224, 224, 1),
-                                  height: 2,
-                                  thickness: 1.2,
-                                ),
-                              );
-                            },
-                            shrinkWrap: true,
-                            itemCount: Provider.of<Activities>(context)
-                                .activitiesMonth
-                                .length,
-                            itemBuilder: (ctx, index) {
-                              return Row(
-                                //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Expanded(
-                                    flex: 8,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              left: 10, right: 15),
-                                          child: MaterialButton(
-                                            minWidth: 40,
-                                            elevation: 0,
-                                            onPressed: () {},
-                                            color: Color.fromRGBO(
-                                                0, 150, 136, 0.1),
-                                            textColor: Colors.white,
-                                            padding: const EdgeInsets.all(6),
-                                            shape: const CircleBorder(),
-                                            child: ((() {
-                                              switch (Provider.of<Activities>(
-                                                      context)
-                                                  .activitiesMonth[index]
-                                                  .type) {
-                                                case 'Walk':
-                                                  {
-                                                    return const Icon(
-                                                      Icons
-                                                          .directions_walk_outlined,
-                                                      color: Color.fromRGBO(
-                                                          0, 150, 136, 1),
-                                                      size: 30,
-                                                    );
-                                                  }
-                                                case 'Running':
-                                                  {
-                                                    return const Icon(
-                                                      Icons
-                                                          .directions_run_outlined,
-                                                      color: Color.fromRGBO(
-                                                          0, 150, 136, 1),
-                                                      size: 30,
-                                                    );
-                                                  }
-                                                case 'Bicycle':
-                                                  {
-                                                    return const Icon(
-                                                      Icons
-                                                          .directions_bike_outlined,
-                                                      color: Color.fromRGBO(
-                                                          0, 150, 136, 1),
-                                                      size: 30,
-                                                    );
-                                                  }
-                                                case 'Car':
-                                                  {
-                                                    return const Icon(
-                                                      Icons
-                                                          .directions_car_outlined,
-                                                      color: Color.fromRGBO(
-                                                          0, 150, 136, 1),
-                                                      size: 30,
-                                                    );
-                                                  }
-                                              }
-                                            }())),
-                                          ),
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '${Provider.of<Activities>(context).activitiesMonth[index].type}',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 18),
-                                            ),
-                                            Text(
-                                              '${Provider.of<Activities>(context).activitiesMonth[index].date}',
-                                              // '${Provider.of<Activities>(context).activitiesMonth[index].time}',
+                    : Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5, top: 10),
 
-                                              style: const TextStyle(
-                                                  fontSize: 14,
-                                                  color: Color(0XFF828282)),
-                                            )
-                                          ],
-                                        ),
-                                      ],
+                            child: Text(
+                              ' ${getSelectedMonth(Provider.of<Activities>(context).nbMonth)} ${DateTime.now().year}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          Center(
+                            child: Text(
+                              'No activity detected in this month.',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color.fromRGBO(3, 96, 99, 1),
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            heightFactor: 8,
+                            widthFactor: 10,
+                          ),
+                        ],
+                      ),
+
+                Expanded(
+                  child: ListView.separated(
+                      separatorBuilder: (BuildContext context, int index) {
+                        return Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          child: Divider(
+                            color: Color.fromRGBO(224, 224, 224, 1),
+                            height: 2,
+                            thickness: 1.2,
+                          ),
+                        );
+                      },
+                      shrinkWrap: true,
+                      itemCount: Provider.of<Activities>(context)
+                          .activitiesMonth
+                          .length,
+                      itemBuilder: (ctx, index) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              flex: 8,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding:
+                                        EdgeInsets.only(left: 10, right: 15),
+                                    child: MaterialButton(
+                                      minWidth: 40,
+                                      elevation: 0,
+                                      onPressed: () {},
+                                      color: Color.fromRGBO(0, 150, 136, 0.1),
+                                      textColor: Colors.white,
+                                      padding: const EdgeInsets.all(6),
+                                      shape: const CircleBorder(),
+                                      child: ((() {
+                                        switch (Provider.of<Activities>(context)
+                                            .activitiesMonth[index]
+                                            .type) {
+                                          case 'Walk':
+                                            {
+                                              return const Icon(
+                                                Icons.directions_walk_outlined,
+                                                color: Color.fromRGBO(
+                                                    0, 150, 136, 1),
+                                                size: 30,
+                                              );
+                                            }
+                                          case 'Running':
+                                            {
+                                              return const Icon(
+                                                Icons.directions_run_outlined,
+                                                color: Color.fromRGBO(
+                                                    0, 150, 136, 1),
+                                                size: 30,
+                                              );
+                                            }
+                                          case 'Bicycle':
+                                            {
+                                              return const Icon(
+                                                Icons.directions_bike_outlined,
+                                                color: Color.fromRGBO(
+                                                    0, 150, 136, 1),
+                                                size: 30,
+                                              );
+                                            }
+                                          case 'Car':
+                                            {
+                                              return const Icon(
+                                                Icons.directions_car_outlined,
+                                                color: Color.fromRGBO(
+                                                    0, 150, 136, 1),
+                                                size: 30,
+                                              );
+                                            }
+                                        }
+                                      }())),
                                     ),
                                   ),
-                                  Expanded(
-                                      flex: 3,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Provider.of<Activities>(context)
-                                                      .activitiesMonth[index]
-                                                      .type ==
-                                                  'Walk'
-                                              ? Text(
-                                                  '${textWalkDistance(Provider.of<Activities>(context).activitiesMonth[index].distance)}',
-                                                  textAlign: TextAlign.right,
-                                                  style: const TextStyle(
-                                                      fontSize: 15),
-                                                )
-                                              : Text(
-                                                  '${Provider.of<Activities>(context).activitiesMonth[index].distance.toStringAsFixed(1)} km',
-                                                  textAlign: TextAlign.right,
-                                                  style: const TextStyle(
-                                                      fontSize: 15),
-                                                ),
-                                        ],
-                                      )),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Provider.of<Activities>(context)
-                                                    .activitiesMonth[index]
-                                                    .type ==
-                                                'Walk'
-                                            ? Text(
-                                                ' ${textWalkCarbon(Provider.of<Activities>(context).activitiesMonth[index].carbon)}',
-                                                style: const TextStyle(
-                                                  fontSize: 15.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color.fromRGBO(
-                                                      0, 150, 136, 1),
-                                                ),
-                                              )
-                                            : Text(
-                                                ' ${Provider.of<Activities>(context).activitiesMonth[index].carbon.toStringAsFixed(2)} kg',
-                                                style: const TextStyle(
-                                                  fontSize: 15.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color.fromRGBO(
-                                                      0, 150, 136, 1),
-                                                ),
-                                              ),
-                                        Container(
-                                          padding: EdgeInsets.only(right: 15),
-                                          child: const Text(' CO²',
-                                              style: TextStyle(
-                                                fontSize: 14.0,
-                                              )),
-                                        ),
-                                      ],
-                                    ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${Provider.of<Activities>(context).activitiesMonth[index].type}',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 18),
+                                      ),
+                                      Text(
+                                        '${Provider.of<Activities>(context).activitiesMonth[index].date}',
+
+                                        style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0XFF828282)),
+                                      )
+                                    ],
                                   ),
                                 ],
-                              );
-                            }),
-                      ),
+                              ),
+                            ),
+                            Expanded(
+                                flex: 3,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Provider.of<Activities>(context)
+                                                .activitiesMonth[index]
+                                                .type ==
+                                            'Walk'
+                                        ? Text(
+                                            '${textWalkDistance(Provider.of<Activities>(context).activitiesMonth[index].distance)}',
+                                            textAlign: TextAlign.right,
+                                            style:
+                                                const TextStyle(fontSize: 15),
+                                          )
+                                        : Text(
+                                            '${Provider.of<Activities>(context).activitiesMonth[index].distance.toStringAsFixed(1)} km',
+                                            textAlign: TextAlign.right,
+                                            style:
+                                                const TextStyle(fontSize: 15),
+                                          ),
+                                  ],
+                                )),
+                            Expanded(
+                              flex: 5,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Provider.of<Activities>(context)
+                                              .activitiesMonth[index]
+                                              .type ==
+                                          'Walk'
+                                      ? Text(
+                                          ' ${textWalkCarbon(Provider.of<Activities>(context).activitiesMonth[index].carbon)}',
+                                          style: const TextStyle(
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Color.fromRGBO(0, 150, 136, 1),
+                                          ),
+                                        )
+                                      : Text(
+                                          ' ${Provider.of<Activities>(context).activitiesMonth[index].carbon.toStringAsFixed(2)} kg',
+                                          style: const TextStyle(
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Color.fromRGBO(0, 150, 136, 1),
+                                          ),
+                                        ),
+                                  Container(
+                                    padding: EdgeInsets.only(right: 15),
+                                    child: const Text(' CO²',
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                ),
               ],
             ),
           );
